@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 **Phase 1 — Application Foundation**
 
-The Next.js foundation and PostgreSQL/Drizzle schema are in place. The next explicitly requested task will add deterministic seed data for Acme Corp, Alice, Bob, Carol, Website, and Mobile App.
+The Next.js foundation, PostgreSQL/Drizzle schema, and repeatable Acme Corp seed are in place. The next explicitly requested task will expose this data through a minimal read-only project list.
 
 ## Local database
 
@@ -42,6 +42,7 @@ Copy the example environment values, start PostgreSQL, then apply migrations:
 cp .env.example .env.local
 docker compose up -d
 npm run db:migrate
+npm run db:seed
 ```
 
 This requires a running Docker daemon and the Docker Compose v2 plugin.
