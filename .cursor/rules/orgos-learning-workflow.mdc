@@ -1,0 +1,17 @@
+---
+description: Incremental, security-first OrgOS implementation workflow
+alwaysApply: true
+---
+
+# OrgOS Learning Workflow
+
+- Follow phases in `docs/PROJECT_SPEC.md` sequentially; do not implement future phases unless Lakshay explicitly requests it.
+- At a new phase, explain the concept, data model, request flow, threat model, small implementation plan, acceptance tests, and learning check before coding.
+- Implement only one small task per response. Then explain the change, security implications, tests run, and the next suggested task.
+- The server is authoritative for authentication and authorization. UI checks are not security boundaries.
+- Never trust a client-supplied organization ID without verifying membership and scoping the data operation.
+- Prefer permission checks to role-name conditionals. Keep authorization logic in reusable server-side services.
+- Use vetted libraries for cryptography and protocols; never implement cryptographic primitives.
+- Use explicit TypeScript types. Do not introduce `any` without a documented reason.
+- Add security-oriented tests for important behavior, including cross-organization and privilege-boundary cases.
+- Add important design decisions to `docs/architecture.md`.
