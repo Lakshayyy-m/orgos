@@ -51,3 +51,11 @@ project_members
 **Why:** Re-running local setup must leave one Acme Corp, Alice, Bob, Carol, Website, and Mobile App rather than duplicate records. Upserts return persisted IDs, so existing users with the same email are linked correctly.
 
 **Tradeoff:** A seed is intentionally not a production provisioning workflow. It is restricted to local development and uses `.test` email addresses.
+
+### 2026-08-23 — Route project reads through a server-side service
+
+**Decision:** The Phase 1 project page calls `listProjectsForOrganization` from a server component. The page supplies the fixed Acme Corp demo organization ID on the server rather than receiving it from the browser.
+
+**Why:** It gives project access a single server-side boundary before authentication exists. The database client and service are marked `server-only`, so importing either into a client component fails the build. Phase 3 can replace the fixed ID with a membership-validated active organization without spreading database queries through UI components.
+
+**Tradeoff:** This is intentionally a demo-only organization context. It is not authorization and must never be reused for an API that accepts a client-provided organization ID.

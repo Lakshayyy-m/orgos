@@ -1,4 +1,5 @@
-import { db, pool } from "../client";
+import "../environment";
+import { closeDatabaseConnection, getDatabase } from "../client";
 import {
   organizationMembers,
   organizations,
@@ -6,6 +7,7 @@ import {
   projects,
   users,
 } from "../schema";
+import { DEMO_ACME_ORGANIZATION_ID } from "../../src/organizations/demo-organization";
 
 type SeedUser = {
   id: string;
@@ -26,7 +28,7 @@ type SeedProjectMember = {
 };
 
 const acmeCorp = {
-  id: "00000000-0000-4000-8000-000000000010",
+  id: DEMO_ACME_ORGANIZATION_ID,
   name: "Acme Corp",
 } as const;
 
@@ -95,7 +97,7 @@ function getRequiredId(ids: ReadonlyMap<string, string>, key: string): string {
 }
 
 async function seedDatabase(): Promise<void> {
-  await db.transaction(async (transaction) => {
+  await getDatabase().transaction(async (transaction) => {
     const userIdsByEmail = new Map<string, string>();
 
     for (const seedUser of seedUsers) {
@@ -197,7 +199,7 @@ async function main(): Promise<void> {
     await seedDatabase();
     console.info("Seeded Acme Corp with three users and two projects.");
   } finally {
-    await pool.end();
+    await closeDatabaseConnection();
   }
 }
 
