@@ -43,3 +43,11 @@ project_members
 **Alternative:** Rely on application services to check organization membership before inserts.
 
 **Tradeoff:** The table stores a value derivable from the project, and mutations are more complex. The database-level tenant invariant is worth that cost for a learning-focused authorization system.
+
+### 2026-08-23 — Make development seed data idempotent
+
+**Decision:** The Acme Corp seed uses stable fixture UUIDs, natural conflict targets, and one database transaction.
+
+**Why:** Re-running local setup must leave one Acme Corp, Alice, Bob, Carol, Website, and Mobile App rather than duplicate records. Upserts return persisted IDs, so existing users with the same email are linked correctly.
+
+**Tradeoff:** A seed is intentionally not a production provisioning workflow. It is restricted to local development and uses `.test` email addresses.
