@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OrgOS
 
-## Getting Started
+An educational B2B identity and authorization platform that explores the engineering challenges behind modern multi-tenant authentication systems.
 
-First, run the development server:
+Built to understand:
+
+- Authentication and sessions
+- Multi-tenancy and organizations
+- RBAC and server-side authorization
+- API keys and audit logging
+- Enterprise provisioning and SSO concepts
+- Secure impersonation
+- MCP authorization
+- SDK design
+
+The product is deliberately built in small, security-focused phases. The canonical scope and workflow live in [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md).
+
+## Why I built this
+
+I want to understand what happens beneath a B2B authentication platform rather than only learning how to integrate one.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Current phase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Phase 1 — Application Foundation**
 
-## Learn More
+The Next.js foundation and PostgreSQL/Drizzle schema are in place. The next explicitly requested task will add deterministic seed data for Acme Corp, Alice, Bob, Carol, Website, and Mobile App.
 
-To learn more about Next.js, take a look at the following resources:
+## Local database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Copy the example environment values, start PostgreSQL, then apply migrations:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp .env.example .env.local
+docker compose up -d
+npm run db:migrate
+```
 
-## Deploy on Vercel
+This requires a running Docker daemon and the Docker Compose v2 plugin.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Master specification](docs/PROJECT_SPEC.md)
+- [Architecture decisions](docs/architecture.md)
