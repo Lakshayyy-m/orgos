@@ -56,6 +56,38 @@ project_members
 
 **Decision:** The Phase 1 project page calls `listProjectsForOrganization` from a server component. The page supplies the fixed Acme Corp demo organization ID on the server rather than receiving it from the browser.
 
-**Why:** It gives project access a single server-side boundary before authentication exists. The database client and service are marked `server-only`, so importing either into a client component fails the build. Phase 3 can replace the fixed ID with a membership-validated active organization without spreading database queries through UI components.
+**Why:** It gives project access a single server-side boundary before authentication exists. The web-only database entrypoint and project service are marked `server-only`, so importing them into a client component fails the build. The shared database client remains usable by CLI scripts such as the development seed. Phase 3 can replace the fixed ID with a membership-validated active organization without spreading database queries through UI components.
 
 **Tradeoff:** This is intentionally a demo-only organization context. It is not authorization and must never be reused for an API that accepts a client-provided organization ID.
+
+### 2026-08-23 — Scope Phase 1 project creation on the server
+
+**Decision:** The project creation action reads only `name` and `description` from the form. It supplies the Acme Corp demo organization ID on the server, validates both fields, and relies on the database uniqueness constraint for duplicate names.
+
+**Why:** Browser constraints can be bypassed with a direct POST. Server validation and a fixed server-side organization scope prevent malformed input and tenant selection from entering the project service.
+
+**Tradeoff:** The action is deliberately unauthenticated during Phase 1. Before authentication ships, it is usable only as local demo behavior; Phase 3/4 must resolve membership and permissions before calling the project service.
+
+### 2026-08-23 — Use Zod for request-boundary validation
+
+**Decision:** Project form input is parsed with a Zod schema at the server-action boundary. The inferred type is shared with the project service input contract.
+
+**Why:** One schema now defines runtime validation, trimming, length limits, user-facing validation messages, and the validated TypeScript type. The server action still validates direct POSTs; browser constraints remain usability enhancements only.
+
+**Tradeoff:** Zod does not replace Drizzle schema constraints, database uniqueness, or future authentication and authorization checks. It is used for untrusted application input, not as a database-model generator.
+
+### 2026-08-23 — Use concise feature-local module names
+
+**Decision:** Project code is organized under `src/projects` as `service.ts`, `validation.ts`, and `contracts.ts`. A contract contains only types shared across the client/server action boundary. Route-owned UI and local state live under `app/(customer-app)/projects/_components`.
+
+**Why:** A feature-local `lib` directory and names such as `project-validation.ts` repeat context already supplied by the folder path. A root-level `app/_components` would become a cross-route bucket, while route-owned components scale with their route. The `(customer-app)` route group organizes the application area without changing the `/projects` URL.
+
+**Tradeoff:** Feature folders need clear boundaries. General-purpose utilities belong in a future shared `src/lib` module only when they are used across multiple domains.
+
+### 2026-08-23 — Read project members through a scoped join
+
+**Decision:** The project service fetches projects, project memberships, and member names in one organization-scoped query, then groups the joined rows for the UI.
+
+**Why:** It avoids N+1 member queries and keeps the organization filter at the database access boundary. The UI receives only the project members associated with the fixed Phase 1 Acme Corp context.
+
+**Tradeoff:** This is a display-only membership view. A later task will add assignment and removal through a server action; Phase 3 will replace the demo context with a membership-validated active organization.

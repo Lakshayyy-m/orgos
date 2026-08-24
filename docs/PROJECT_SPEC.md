@@ -38,6 +38,22 @@ tests/unit/ tests/e2e/       Vitest and Playwright suites
 docs/                        architecture and security documentation
 ```
 
+### Feature module conventions
+
+Keep code local to its domain until it is genuinely shared:
+
+```text
+src/projects/
+  contracts.ts      types shared across the Server Action/client boundary only
+  validation.ts     pure Zod validation and shared field limits
+  service.ts        server-only database operations
+app/(customer-app)/projects/
+  page.tsx          project workspace route
+  _components/      UI owned only by the project workspace
+```
+
+Route groups organize application areas without changing the URL, so the workspace is available at `/projects`. Do not create `src/projects/lib` as a catch-all. Reserve a future `src/lib` for utilities shared across domains. Browser constraints improve usability; Zod validation in Server Actions remains authoritative at application request boundaries.
+
 ## Delivery phases
 
 1. **Application foundation** — unauthenticated AcmeBoard, relational data model, organization/projects/project-member CRUD, deterministic seed data.
