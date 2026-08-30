@@ -131,3 +131,11 @@ project_members
 **Why:** The database performs the project and membership cleanup atomically. The confirmation dialog makes the destructive consequence visible, but a tampered project ID cannot delete a project outside Acme Corp.
 
 **Tradeoff:** Phase 1 permits this local demo mutation without authentication. Phase 4 will require `projects.delete` before it can execute.
+
+### 2026-08-30 — Read organization overview through server-side queries
+
+**Decision:** The organization overview queries Acme Corp, its members, and its project count from a server-only organization service. Member and project counts are fetched separately to avoid inflated aggregates from joining two one-to-many relationships.
+
+**Why:** The browser never supplies an organization ID, and the overview accurately demonstrates the membership and project relationships without N+1 queries.
+
+**Tradeoff:** It is a fixed Phase 1 demo context, not organization switching or authorization. Phase 3 will replace it with active organization resolution and membership checks.

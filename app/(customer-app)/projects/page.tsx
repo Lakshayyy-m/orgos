@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization";
 import {
   listOrganizationMembers,
@@ -29,6 +30,12 @@ export default async function ProjectsPage() {
         <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
           Acme Corp&apos;s unauthenticated Phase 1 workspace.
         </p>
+        <Link
+          className="mt-3 inline-block cursor-pointer text-sm font-medium text-indigo-700 underline"
+          href="/organization"
+        >
+          View organization
+        </Link>
         <section className="mt-12 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold">Create a project</h2>
           <CreateProjectForm />
