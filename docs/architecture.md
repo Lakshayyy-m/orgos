@@ -171,3 +171,11 @@ project_members
 **Why:** Argon2id is memory-hard against offline password cracking. High-entropy opaque secrets cannot be feasibly guessed, and a database disclosure exposes only non-usable hashes.
 
 **Tradeoff:** Argon2id intentionally consumes more resources than a fast hash. Its parameters should be reviewed against deployment hardware as the system grows.
+
+### 2026-08-30 — Register users and verification tokens atomically
+
+**Decision:** Registration validates and normalizes input, computes the Argon2id hash before a database transaction, then creates the user, credential, and hashed verification token together.
+
+**Why:** Hashing outside the transaction avoids holding database locks during the deliberately costly operation. The transaction prevents a partially registered account without its credential or verification record.
+
+**Tradeoff:** A duplicate email still incurs one password-hash computation before the database rejects it. This avoids a race-prone pre-check and keeps email uniqueness authoritative in PostgreSQL.

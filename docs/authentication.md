@@ -21,7 +21,7 @@ These use vetted package or platform cryptography. OrgOS does not implement pass
 
 ## Request lifecycle
 
-Registration creates the user, password credential, and a short-lived verification token. The browser or email receives only the raw verification secret.
+Registration normalizes and validates input, hashes the password before opening a database transaction, then creates the user, password credential, and short-lived verification-token hash atomically. The browser or email receives only the raw verification secret.
 
 Login verifies the password hash and creates a session. The response receives the raw session secret in a secure cookie; later requests hash that value and load a non-expired, non-revoked session.
 
@@ -37,3 +37,5 @@ Login verifies the password hash and creates a session. The response receives th
 Opaque sessions make server-side revocation and session inspection straightforward, at the cost of a database lookup per authenticated request. We choose that tradeoff over JWT-only browser authentication for clear revocation semantics.
 
 `password_credentials` is separate from `users`, avoiding a nullable password column and preparing for future SSO-only users. The initial token-hash column width matches a SHA-256 hex digest; implementation uses standard platform cryptography, not custom algorithms.
+
+Registration hashes before its transaction so expensive password work does not hold database locks. The transaction prevents partial accounts: a user cannot exist without the corresponding credential and verification-token record when registration succeeds.
