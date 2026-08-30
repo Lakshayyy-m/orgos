@@ -4,3 +4,4 @@ export type ProjectCreationState = {
 };
 
 export type ProjectMemberAssignmentState = ProjectCreationState;
+export type ProjectMemberRemovalState = ProjectCreationState;

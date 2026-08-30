@@ -5,6 +5,7 @@ import {
 } from "@/src/projects/service";
 import { AssignProjectMemberForm } from "./_components/assign-project-member-form";
 import { CreateProjectForm } from "./_components/create-project-form";
+import { RemoveProjectMemberButton } from "./_components/remove-project-member-button";
 
 export const dynamic = "force-dynamic";
 
@@ -52,13 +53,30 @@ export default async function ProjectsPage() {
                 <p className="mt-2 text-zinc-600">
                   {project.description || "No description provided."}
                 </p>
-                <p className="mt-4 text-sm text-zinc-500">
-                  {project.members.length === 0
-                    ? "No members assigned."
-                    : `Members: ${project.members
-                        .map((member) => member.displayName)
-                        .join(", ")}`}
-                </p>
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-zinc-700">Members</h3>
+                  {project.members.length === 0 ? (
+                    <p className="mt-1 text-sm text-zinc-500">
+                      No members assigned.
+                    </p>
+                  ) : (
+                    <ul className="mt-2 space-y-2">
+                      {project.members.map((member) => (
+                        <li
+                          className="flex items-center justify-between gap-4 text-sm text-zinc-600"
+                          key={member.id}
+                        >
+                          <span>{member.displayName}</span>
+                          <RemoveProjectMemberButton
+                            memberId={member.id}
+                            memberName={member.displayName}
+                            projectId={project.id}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </article>
             ))
           )}

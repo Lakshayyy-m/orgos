@@ -7,10 +7,12 @@ import {
   createProjectForOrganization,
   isProjectNameConflict,
   ProjectMembershipError,
+  removeProjectMember,
 } from "@/src/projects/service";
 import type {
   ProjectCreationState,
   ProjectMemberAssignmentState,
+  ProjectMemberRemovalState,
 } from "@/src/projects/contracts";
 import {
   validateProjectInput,
@@ -114,6 +116,53 @@ export async function assignProjectMemberAction(
     return {
       status: "error",
       message: "Unable to assign the member. Try again.",
+    };
+  }
+}
+
+export async function removeProjectMemberAction(
+  _previousState: ProjectMemberRemovalState,
+  formData: FormData,
+): Promise<ProjectMemberRemovalState> {
+  const validation = validateProjectMemberAssignment({
+    projectId: formData.get("projectId"),
+    userId: formData.get("userId"),
+  });
+
+  if (!validation.isValid) {
+    return {
+      status: "error",
+      message: validation.message,
+    };
+  }
+
+  try {
+    const result = await removeProjectMember({
+      organizationId: DEMO_ACME_ORGANIZATION_ID,
+      projectId: validation.value.projectId,
+      userId: validation.value.userId,
+    });
+
+    if (result.status === "not_assigned") {
+      return {
+        status: "error",
+        message: "That member is not assigned to this project.",
+      };
+    }
+
+    revalidatePath("/projects");
+
+    return {
+      status: "success",
+      message: "Project member removed.",
+    };
+  } catch (error: unknown) {
+    // eslint-disable-next-line no-console -- Server-side failures need logging until structured logging is introduced.
+    console.error("Project member removal failed.", error);
+
+    return {
+      status: "error",
+      message: "Unable to remove the member. Try again.",
     };
   }
 }

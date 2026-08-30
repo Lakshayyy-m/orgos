@@ -45,6 +45,16 @@ export type AssignProjectMemberResult = {
   status: "assigned" | "already_assigned";
 };
 
+export type RemoveProjectMemberInput = {
+  organizationId: string;
+  projectId: string;
+  userId: string;
+};
+
+export type RemoveProjectMemberResult = {
+  status: "removed" | "not_assigned";
+};
+
 export class ProjectMembershipError extends Error {
   constructor(
     public readonly code: "project_not_found" | "user_not_in_organization",
@@ -177,6 +187,25 @@ export async function assignProjectMember(
 
   return {
     status: assignment ? "assigned" : "already_assigned",
+  };
+}
+
+export async function removeProjectMember(
+  input: RemoveProjectMemberInput,
+): Promise<RemoveProjectMemberResult> {
+  const [removedMembership] = await getDatabase()
+    .delete(projectMembers)
+    .where(
+      and(
+        eq(projectMembers.organizationId, input.organizationId),
+        eq(projectMembers.projectId, input.projectId),
+        eq(projectMembers.userId, input.userId),
+      ),
+    )
+    .returning({ id: projectMembers.id });
+
+  return {
+    status: removedMembership ? "removed" : "not_assigned",
   };
 }
 

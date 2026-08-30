@@ -90,7 +90,7 @@ project_members
 
 **Why:** It avoids N+1 member queries and keeps the organization filter at the database access boundary. The UI receives only the project members associated with the fixed Phase 1 Acme Corp context.
 
-**Tradeoff:** The view and assignment flow remain limited to the Phase 1 demo organization. A later task will add removal; Phase 3 will replace the demo context with a membership-validated active organization.
+**Tradeoff:** The view, assignment, and removal flows remain limited to the Phase 1 demo organization. Phase 3 will replace the demo context with a membership-validated active organization.
 
 ### 2026-08-23 — Validate both sides of project-member assignment
 
@@ -99,3 +99,19 @@ project_members
 **Why:** A direct POST can change either ID. Validation alone only checks syntax; server-side organization-scoped lookups and the `project_members` composite foreign keys together prevent tenant confusion.
 
 **Tradeoff:** This is not user authorization. Phase 3/4 will resolve an authenticated actor and require the appropriate organization permission before this mutation is allowed.
+
+### 2026-08-29 — Scope project-member removal inside the delete query
+
+**Decision:** The removal action validates the project and user IDs, supplies the organization ID server-side, and deletes only where all three values match.
+
+**Why:** A caller can tamper with hidden form fields. Including the organization scope in the `DELETE` predicate makes a cross-organization membership removal a no-op, even if a valid project and user ID are supplied.
+
+**Tradeoff:** The response distinguishes only assigned from not assigned. This is sufficient for Phase 1; later authorization will decide whether an actor may inspect or change a membership.
+
+### 2026-08-29 — Confirm project-access removal in the UI
+
+**Decision:** Project-member removal uses a native modal dialog with an explicit “Remove access” action and an accessible cancel path.
+
+**Why:** Removing a project member is destructive from the user’s perspective. The visible button hover/focus states communicate interactivity, while the confirmation clarifies that project access—not organization membership—is removed.
+
+**Tradeoff:** Confirmation prevents accidental interaction but is not a security control. Server-side validation and the organization-scoped delete remain authoritative.
