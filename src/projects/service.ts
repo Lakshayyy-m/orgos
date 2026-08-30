@@ -39,6 +39,11 @@ export type UpdateProjectInput = CreateProjectInput & {
   projectId: string;
 };
 
+export type DeleteProjectInput = {
+  organizationId: string;
+  projectId: string;
+};
+
 export type AssignProjectMemberInput = {
   organizationId: string;
   projectId: string;
@@ -156,6 +161,27 @@ export async function updateProjectForOrganization(
       description: input.description,
       updatedAt: new Date(),
     })
+    .where(
+      and(
+        eq(projects.id, input.projectId),
+        eq(projects.organizationId, input.organizationId),
+      ),
+    )
+    .returning({
+      id: projects.id,
+      name: projects.name,
+      description: projects.description,
+      createdAt: projects.createdAt,
+    });
+
+  return project ?? null;
+}
+
+export async function deleteProjectForOrganization(
+  input: DeleteProjectInput,
+): Promise<ProjectSummary | null> {
+  const [project] = await getDatabase()
+    .delete(projects)
     .where(
       and(
         eq(projects.id, input.projectId),

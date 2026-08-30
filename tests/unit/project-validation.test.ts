@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   maximumProjectDescriptionLength,
   maximumProjectNameLength,
+  validateProjectDeletion,
   validateProjectInput,
   validateProjectMemberAssignment,
   validateProjectUpdate,
@@ -102,6 +103,29 @@ describe("validateProjectUpdate", () => {
         projectId: "not-a-project-id",
         name: "Roadmap",
         description: "",
+      }),
+    ).toMatchObject({ isValid: false });
+  });
+});
+
+describe("validateProjectDeletion", () => {
+  it("accepts a valid project ID", () => {
+    expect(
+      validateProjectDeletion({
+        projectId: "00000000-0000-4000-8000-000000000101",
+      }),
+    ).toEqual({
+      isValid: true,
+      value: {
+        projectId: "00000000-0000-4000-8000-000000000101",
+      },
+    });
+  });
+
+  it("rejects a malformed project ID from a direct POST", () => {
+    expect(
+      validateProjectDeletion({
+        projectId: "not-a-project-id",
       }),
     ).toMatchObject({ isValid: false });
   });

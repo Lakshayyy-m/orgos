@@ -5,6 +5,7 @@ import {
 } from "@/src/projects/service";
 import { AssignProjectMemberForm } from "./_components/assign-project-member-form";
 import { CreateProjectForm } from "./_components/create-project-form";
+import { DeleteProjectButton } from "./_components/delete-project-button";
 import { RemoveProjectMemberButton } from "./_components/remove-project-member-button";
 import { UpdateProjectForm } from "./_components/update-project-form";
 
@@ -22,7 +23,9 @@ export default async function ProjectsPage() {
         <p className="mb-4 text-sm font-semibold tracking-[0.2em] text-indigo-700">
           ACMEBOARD / ORGOS
         </p>
-        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">Projects</h1>
+        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
+          Projects
+        </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
           Acme Corp&apos;s unauthenticated Phase 1 workspace.
         </p>
@@ -55,6 +58,13 @@ export default async function ProjectsPage() {
                   initialName={project.name}
                   projectId={project.id}
                 />
+                <div className="mt-3 flex justify-end">
+                  <DeleteProjectButton
+                    memberCount={project.members.length}
+                    projectId={project.id}
+                    projectName={project.name}
+                  />
+                </div>
                 <div className="mt-4">
                   <h3 className="text-sm font-medium text-zinc-700">Members</h3>
                   {project.members.length === 0 ? (
@@ -62,7 +72,7 @@ export default async function ProjectsPage() {
                       No members assigned.
                     </p>
                   ) : (
-                    <ul className="mt-2 space-y-2">
+                    <ul className="mt-2">
                       {project.members.map((member) => (
                         <li
                           className="flex items-center justify-between gap-4 text-sm text-zinc-600"

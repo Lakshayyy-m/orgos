@@ -34,11 +34,16 @@ export const projectUpdateSchema = projectInputSchema.extend({
   projectId: projectIdSchema,
 });
 
+export const projectDeletionSchema = z.object({
+  projectId: projectIdSchema,
+});
+
 export type ValidatedProjectInput = z.infer<typeof projectInputSchema>;
 export type ValidatedProjectMemberAssignment = z.infer<
   typeof projectMemberAssignmentSchema
 >;
 export type ValidatedProjectUpdate = z.infer<typeof projectUpdateSchema>;
+export type ValidatedProjectDeletion = z.infer<typeof projectDeletionSchema>;
 
 export type ProjectInputValidationResult =
   | { isValid: true; value: ValidatedProjectInput }
@@ -50,6 +55,10 @@ export type ProjectMemberAssignmentValidationResult =
 
 export type ProjectUpdateValidationResult =
   | { isValid: true; value: ValidatedProjectUpdate }
+  | { isValid: false; message: string };
+
+export type ProjectDeletionValidationResult =
+  | { isValid: true; value: ValidatedProjectDeletion }
   | { isValid: false; message: string };
 
 function getValidationMessage(error: z.ZodError): string {
@@ -96,6 +105,24 @@ export function validateProjectUpdate(
   input: unknown,
 ): ProjectUpdateValidationResult {
   const result = projectUpdateSchema.safeParse(input);
+
+  if (!result.success) {
+    return {
+      isValid: false,
+      message: getValidationMessage(result.error),
+    };
+  }
+
+  return {
+    isValid: true,
+    value: result.data,
+  };
+}
+
+export function validateProjectDeletion(
+  input: unknown,
+): ProjectDeletionValidationResult {
+  const result = projectDeletionSchema.safeParse(input);
 
   if (!result.success) {
     return {

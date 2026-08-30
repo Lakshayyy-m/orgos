@@ -123,3 +123,11 @@ project_members
 **Why:** A direct POST can modify a hidden project ID or bypass browser length limits. The server validates untrusted input, prevents client-controlled tenant selection, and preserves the per-organization project-name uniqueness constraint.
 
 **Tradeoff:** The Phase 1 edit form has no permission check. Phase 4 will require `projects.update` before the service executes the mutation.
+
+### 2026-08-30 — Cascade project-membership removal on project deletion
+
+**Decision:** Project deletion validates the project ID, scopes the delete by the server-supplied organization ID, and relies on PostgreSQL’s `ON DELETE CASCADE` foreign key to remove associated project memberships.
+
+**Why:** The database performs the project and membership cleanup atomically. The confirmation dialog makes the destructive consequence visible, but a tampered project ID cannot delete a project outside Acme Corp.
+
+**Tradeoff:** Phase 1 permits this local demo mutation without authentication. Phase 4 will require `projects.delete` before it can execute.

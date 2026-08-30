@@ -5,6 +5,7 @@ import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization
 import {
   assignProjectMember,
   createProjectForOrganization,
+  deleteProjectForOrganization,
   isProjectNameConflict,
   ProjectMembershipError,
   removeProjectMember,
@@ -12,12 +13,14 @@ import {
 } from "@/src/projects/service";
 import type {
   ProjectCreationState,
+  ProjectDeletionState,
   ProjectMemberAssignmentState,
   ProjectMemberRemovalState,
   ProjectUpdateState,
 } from "@/src/projects/contracts";
 import {
   validateProjectInput,
+  validateProjectDeletion,
   validateProjectMemberAssignment,
   validateProjectUpdate,
 } from "@/src/projects/validation";
@@ -121,6 +124,51 @@ export async function updateProjectAction(
     return {
       status: "error",
       message: "Unable to update the project. Try again.",
+    };
+  }
+}
+
+export async function deleteProjectAction(
+  _previousState: ProjectDeletionState,
+  formData: FormData,
+): Promise<ProjectDeletionState> {
+  const validation = validateProjectDeletion({
+    projectId: formData.get("projectId"),
+  });
+
+  if (!validation.isValid) {
+    return {
+      status: "error",
+      message: validation.message,
+    };
+  }
+
+  try {
+    const project = await deleteProjectForOrganization({
+      organizationId: DEMO_ACME_ORGANIZATION_ID,
+      projectId: validation.value.projectId,
+    });
+
+    if (!project) {
+      return {
+        status: "error",
+        message: "That project does not belong to Acme Corp.",
+      };
+    }
+
+    revalidatePath("/projects");
+
+    return {
+      status: "success",
+      message: `${project.name} was deleted.`,
+    };
+  } catch (error: unknown) {
+    // eslint-disable-next-line no-console -- Server-side failures need logging until structured logging is introduced.
+    console.error("Project deletion failed.", error);
+
+    return {
+      status: "error",
+      message: "Unable to delete the project. Try again.",
     };
   }
 }

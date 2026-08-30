@@ -1,31 +1,32 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { removeProjectMemberAction } from "@/app/actions/projects";
-import type { ProjectMemberRemovalState } from "@/src/projects/contracts";
+import { deleteProjectAction } from "@/app/actions/projects";
+import type { ProjectDeletionState } from "@/src/projects/contracts";
 
-type RemoveProjectMemberButtonProps = {
+type DeleteProjectButtonProps = {
   projectId: string;
-  memberId: string;
-  memberName: string;
+  projectName: string;
+  memberCount: number;
 };
 
-const initialProjectMemberRemovalState: ProjectMemberRemovalState = {
+const initialProjectDeletionState: ProjectDeletionState = {
   status: "idle",
   message: "",
 };
 
-export function RemoveProjectMemberButton({
+export function DeleteProjectButton({
   projectId,
-  memberId,
-  memberName,
-}: RemoveProjectMemberButtonProps) {
+  projectName,
+  memberCount,
+}: DeleteProjectButtonProps) {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const confirmationDialogRef = useRef<HTMLDialogElement>(null);
   const [state, formAction, pending] = useActionState(
-    removeProjectMemberAction,
-    initialProjectMemberRemovalState,
+    deleteProjectAction,
+    initialProjectDeletionState,
   );
+  const membershipLabel = memberCount === 1 ? "membership" : "memberships";
 
   useEffect(() => {
     const dialog = confirmationDialogRef.current;
@@ -46,36 +47,33 @@ export function RemoveProjectMemberButton({
   return (
     <>
       <button
-        aria-label={`Remove ${memberName} from this project`}
-        className="cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={pending}
+        className="cursor-pointer rounded-md border border-red-200 px-2 py-1 text-sm font-medium text-red-700 transition-colors hover:border-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
         onClick={() => setIsConfirmationOpen(true)}
         type="button"
       >
-        Remove
+        Delete
       </button>
       <dialog
-        aria-describedby={`remove-member-description-${memberId}`}
-        aria-labelledby={`remove-member-title-${memberId}`}
+        aria-describedby={`delete-project-description-${projectId}`}
+        aria-labelledby={`delete-project-title-${projectId}`}
         className="fixed inset-0 m-auto w-[calc(100%_-_2rem)] max-w-md rounded-xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-xl backdrop:bg-black/40"
         onClose={() => setIsConfirmationOpen(false)}
         ref={confirmationDialogRef}
       >
         <form action={formAction} className="p-6">
           <input name="projectId" type="hidden" value={projectId} />
-          <input name="userId" type="hidden" value={memberId} />
           <h3
             className="text-lg font-semibold"
-            id={`remove-member-title-${memberId}`}
+            id={`delete-project-title-${projectId}`}
           >
-            Remove {memberName}?
+            Delete {projectName}?
           </h3>
           <p
             className="mt-2 text-sm leading-6 text-zinc-600"
-            id={`remove-member-description-${memberId}`}
+            id={`delete-project-description-${projectId}`}
           >
-            This removes the member&apos;s access to this project. They will
-            remain an organization member.
+            This permanently deletes the project and removes its {memberCount}{" "}
+            {membershipLabel}. This cannot be undone.
           </p>
           {state.status === "error" ? (
             <p aria-live="polite" className="mt-3 text-sm text-red-700">
@@ -96,7 +94,7 @@ export function RemoveProjectMemberButton({
               disabled={pending}
               type="submit"
             >
-              {pending ? "Removing…" : "Remove access"}
+              {pending ? "Deleting…" : "Delete project"}
             </button>
           </div>
         </form>
