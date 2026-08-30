@@ -30,9 +30,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Current phase
 
-**Phase 1 — Application Foundation**
+**Phase 2 — Authentication**
 
-Phase 1 is verified against PostgreSQL: the migration applies, the Acme Corp seed is idempotent, and the project and membership relationships load correctly. The next explicitly requested task begins Phase 2 authentication.
+Phase 1 is verified against PostgreSQL. Phase 2 now has its durable credential, verification-token, and opaque-session schema. The next explicitly requested task will add vetted password and token primitives.
 
 ## Local database
 

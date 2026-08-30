@@ -155,3 +155,11 @@ project_members
 **Why:** A fixed server-side target eliminates client-controlled organization selection. The confirmation dialog exposes the destructive impact, while the database provides atomic cleanup of dependent data.
 
 **Tradeoff:** This local demonstration can remove the entire seeded workspace. Re-running the deterministic seed recreates it; production deletion needs authenticated `organizations.delete` authorization in Phase 4.
+
+### 2026-08-30 — Model credentials and opaque sessions separately
+
+**Decision:** Password credentials, email-verification tokens, and sessions are separate tables. Passwords and browser/email secrets are represented only by hashes; `users.email_verified_at` carries the verified state.
+
+**Why:** Separating credentials avoids a nullable or overloaded password field on users and supports future SSO-only accounts. Opaque session lookup supports immediate revocation, expiration, and metadata inspection.
+
+**Tradeoff:** Authentication requires database lookups and lifecycle cleanup. This is intentionally preferred to JWT-only browser sessions so server-side revocation is easy to reason about.
