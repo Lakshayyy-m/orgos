@@ -139,3 +139,11 @@ project_members
 **Why:** The browser never supplies an organization ID, and the overview accurately demonstrates the membership and project relationships without N+1 queries.
 
 **Tradeoff:** It is a fixed Phase 1 demo context, not organization switching or authorization. Phase 3 will replace it with active organization resolution and membership checks.
+
+### 2026-08-30 — Scope organization updates to the fixed demo context
+
+**Decision:** The organization update action validates the name with Zod and passes the Acme Corp ID from server code to the organization service.
+
+**Why:** The browser submits only an untrusted name. It cannot select another organization to update, and server validation remains effective if a direct POST bypasses the form.
+
+**Tradeoff:** This demonstrates basic organization CRUD only. Organization creation, membership, and active-context switching stay deferred to Phase 3.

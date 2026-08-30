@@ -40,7 +40,7 @@ docs/                        architecture and security documentation
 
 ### Feature module conventions
 
-Keep code local to its domain until it is genuinely shared:
+Keep code local to its domain until it is genuinely shared. Apply this separation to every domain with request-boundary validation or server-side data access:
 
 ```text
 src/projects/
@@ -50,6 +50,14 @@ src/projects/
 app/(customer-app)/projects/
   page.tsx          project workspace route
   _components/      UI owned only by the project workspace
+
+src/organizations/
+  contracts.ts      organization Server Action/client types
+  validation.ts     pure Zod validation
+  service.ts        server-only database operations
+app/(customer-app)/organization/
+  page.tsx          organization workspace route
+  _components/      UI owned only by the organization workspace
 ```
 
 Route groups organize application areas without changing the URL, so the workspace is available at `/projects`. Do not create `src/projects/lib` as a catch-all. Reserve a future `src/lib` for utilities shared across domains. Browser constraints improve usability; Zod validation in Server Actions remains authoritative at application request boundaries.

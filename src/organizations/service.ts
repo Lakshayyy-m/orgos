@@ -16,6 +16,16 @@ export type OrganizationOverview = {
   members: readonly OrganizationMember[];
 };
 
+export type UpdateOrganizationInput = {
+  organizationId: string;
+  name: string;
+};
+
+export type OrganizationSummary = {
+  id: string;
+  name: string;
+};
+
 export async function getOrganizationOverview(
   organizationId: string,
 ): Promise<OrganizationOverview | null> {
@@ -57,4 +67,22 @@ export async function getOrganizationOverview(
     projectCount: projectCountRows[0]?.projectCount ?? 0,
     members,
   };
+}
+
+export async function updateOrganization(
+  input: UpdateOrganizationInput,
+): Promise<OrganizationSummary | null> {
+  const [organization] = await getDatabase()
+    .update(organizations)
+    .set({
+      name: input.name,
+      updatedAt: new Date(),
+    })
+    .where(eq(organizations.id, input.organizationId))
+    .returning({
+      id: organizations.id,
+      name: organizations.name,
+    });
+
+  return organization ?? null;
 }

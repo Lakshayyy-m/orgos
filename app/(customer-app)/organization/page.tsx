@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization";
 import { getOrganizationOverview } from "@/src/organizations/service";
+import { UpdateOrganizationForm } from "./_components/update-organization-form";
 
 export const dynamic = "force-dynamic";
 
@@ -36,9 +37,9 @@ export default async function OrganizationPage() {
             <p className="text-sm font-semibold tracking-[0.2em] text-indigo-700">
               ACMEBOARD / ORGANIZATION
             </p>
-            <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-6xl">
-              {organization.name}
-            </h1>
+            <div className="mt-4">
+              <UpdateOrganizationForm initialName={organization.name} />
+            </div>
           </div>
           <Link
             className="cursor-pointer rounded-md border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 transition-colors hover:border-indigo-700 hover:bg-indigo-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700"
