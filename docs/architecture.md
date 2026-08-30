@@ -163,3 +163,11 @@ project_members
 **Why:** Separating credentials avoids a nullable or overloaded password field on users and supports future SSO-only accounts. Opaque session lookup supports immediate revocation, expiration, and metadata inspection.
 
 **Tradeoff:** Authentication requires database lookups and lifecycle cleanup. This is intentionally preferred to JWT-only browser sessions so server-side revocation is easy to reason about.
+
+### 2026-08-30 — Use Argon2id and platform-generated opaque tokens
+
+**Decision:** Passwords use the maintained `argon2` package configured for Argon2id. Session and verification secrets use Node.js cryptographic random bytes, and only their SHA-256 lookup hashes are persisted.
+
+**Why:** Argon2id is memory-hard against offline password cracking. High-entropy opaque secrets cannot be feasibly guessed, and a database disclosure exposes only non-usable hashes.
+
+**Tradeoff:** Argon2id intentionally consumes more resources than a fast hash. Its parameters should be reviewed against deployment hardware as the system grows.

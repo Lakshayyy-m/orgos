@@ -13,6 +13,12 @@ Phase 2 binds a browser request to a user without persisting passwords or reusab
 
 Credential, verification-token, and session records delete when their user is deleted. Raw password, verification, and session secrets are never database values.
 
+## Cryptographic primitives
+
+Passwords use the maintained `argon2` package with Argon2id (`19,456 KiB` memory, two iterations, one lane). Opaque tokens are 32 random bytes encoded as base64url; the database lookup value is a SHA-256 hex digest.
+
+These use vetted package or platform cryptography. OrgOS does not implement password hashing, random-number generation, or hash algorithms itself.
+
 ## Request lifecycle
 
 Registration creates the user, password credential, and a short-lived verification token. The browser or email receives only the raw verification secret.
