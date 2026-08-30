@@ -86,3 +86,17 @@ export async function updateOrganization(
 
   return organization ?? null;
 }
+
+export async function deleteOrganization(
+  organizationId: string,
+): Promise<OrganizationSummary | null> {
+  const [organization] = await getDatabase()
+    .delete(organizations)
+    .where(eq(organizations.id, organizationId))
+    .returning({
+      id: organizations.id,
+      name: organizations.name,
+    });
+
+  return organization ?? null;
+}

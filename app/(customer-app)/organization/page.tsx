@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization";
 import { getOrganizationOverview } from "@/src/organizations/service";
+import { DeleteOrganizationButton } from "./_components/delete-organization-button";
 import { UpdateOrganizationForm } from "./_components/update-organization-form";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,20 @@ export default async function OrganizationPage() {
               </li>
             ))}
           </ul>
+        </section>
+        <section className="mt-12 rounded-2xl border border-red-200 bg-red-50 p-6">
+          <h2 className="text-xl font-semibold text-red-950">Danger zone</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-red-900">
+            Deleting this organization permanently removes all of its projects
+            and project memberships.
+          </p>
+          <div className="mt-4">
+            <DeleteOrganizationButton
+              memberCount={organization.members.length}
+              organizationName={organization.name}
+              projectCount={organization.projectCount}
+            />
+          </div>
         </section>
       </div>
     </main>

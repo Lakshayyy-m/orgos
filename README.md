@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 **Phase 1 — Application Foundation**
 
-The Next.js foundation, PostgreSQL/Drizzle schema, repeatable Acme Corp seed, project CRUD with member assignment/removal flows, and an editable organization overview are in place. The next explicitly requested task will add organization deletion.
+The Next.js foundation, PostgreSQL/Drizzle schema, repeatable Acme Corp seed, project CRUD with member assignment/removal flows, and organization overview/update/delete flows are in place. The next explicitly requested task will verify Phase 1 against a running PostgreSQL database.
 
 ## Local database
 

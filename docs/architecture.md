@@ -147,3 +147,11 @@ project_members
 **Why:** The browser submits only an untrusted name. It cannot select another organization to update, and server validation remains effective if a direct POST bypasses the form.
 
 **Tradeoff:** This demonstrates basic organization CRUD only. Organization creation, membership, and active-context switching stay deferred to Phase 3.
+
+### 2026-08-30 — Cascade organization deletion through Phase 1 data
+
+**Decision:** Organization deletion uses the server-held Acme Corp ID and relies on PostgreSQL foreign-key cascades to remove related organization memberships, projects, and project memberships.
+
+**Why:** A fixed server-side target eliminates client-controlled organization selection. The confirmation dialog exposes the destructive impact, while the database provides atomic cleanup of dependent data.
+
+**Tradeoff:** This local demonstration can remove the entire seeded workspace. Re-running the deterministic seed recreates it; production deletion needs authenticated `organizations.delete` authorization in Phase 4.
