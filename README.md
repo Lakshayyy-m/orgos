@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 **Phase 1 — Application Foundation**
 
-The Next.js foundation, PostgreSQL/Drizzle schema, repeatable Acme Corp seed, project CRUD with member assignment/removal flows, and organization overview/update/delete flows are in place. The next explicitly requested task will verify Phase 1 against a running PostgreSQL database.
+Phase 1 is verified against PostgreSQL: the migration applies, the Acme Corp seed is idempotent, and the project and membership relationships load correctly. The next explicitly requested task begins Phase 2 authentication.
 
 ## Local database
 
