@@ -35,6 +35,10 @@ export type CreateProjectInput = {
   description: string;
 };
 
+export type UpdateProjectInput = CreateProjectInput & {
+  projectId: string;
+};
+
 export type AssignProjectMemberInput = {
   organizationId: string;
   projectId: string;
@@ -140,6 +144,32 @@ export async function createProjectForOrganization(
   }
 
   return project;
+}
+
+export async function updateProjectForOrganization(
+  input: UpdateProjectInput,
+): Promise<ProjectSummary | null> {
+  const [project] = await getDatabase()
+    .update(projects)
+    .set({
+      name: input.name,
+      description: input.description,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(projects.id, input.projectId),
+        eq(projects.organizationId, input.organizationId),
+      ),
+    )
+    .returning({
+      id: projects.id,
+      name: projects.name,
+      description: projects.description,
+      createdAt: projects.createdAt,
+    });
+
+  return project ?? null;
 }
 
 export async function assignProjectMember(

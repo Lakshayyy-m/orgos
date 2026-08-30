@@ -115,3 +115,11 @@ project_members
 **Why:** Removing a project member is destructive from the user’s perspective. The visible button hover/focus states communicate interactivity, while the confirmation clarifies that project access—not organization membership—is removed.
 
 **Tradeoff:** Confirmation prevents accidental interaction but is not a security control. Server-side validation and the organization-scoped delete remain authoritative.
+
+### 2026-08-30 — Scope project updates inside the update query
+
+**Decision:** The update action validates the project ID, name, and description, then the service updates only where the project ID and server-supplied organization ID match.
+
+**Why:** A direct POST can modify a hidden project ID or bypass browser length limits. The server validates untrusted input, prevents client-controlled tenant selection, and preserves the per-organization project-name uniqueness constraint.
+
+**Tradeoff:** The Phase 1 edit form has no permission check. Phase 4 will require `projects.update` before the service executes the mutation.

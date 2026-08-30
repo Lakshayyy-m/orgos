@@ -19,19 +19,26 @@ export const projectInputSchema = z.object({
     }),
 });
 
+const projectIdSchema = z
+  .string({ error: "Select a project." })
+  .uuid({ error: "Select a valid project." });
+
 export const projectMemberAssignmentSchema = z.object({
-  projectId: z
-    .string({ error: "Select a project." })
-    .uuid({ error: "Select a valid project." }),
+  projectId: projectIdSchema,
   userId: z
     .string({ error: "Select an organization member." })
     .uuid({ error: "Select a valid organization member." }),
+});
+
+export const projectUpdateSchema = projectInputSchema.extend({
+  projectId: projectIdSchema,
 });
 
 export type ValidatedProjectInput = z.infer<typeof projectInputSchema>;
 export type ValidatedProjectMemberAssignment = z.infer<
   typeof projectMemberAssignmentSchema
 >;
+export type ValidatedProjectUpdate = z.infer<typeof projectUpdateSchema>;
 
 export type ProjectInputValidationResult =
   | { isValid: true; value: ValidatedProjectInput }
@@ -39,6 +46,10 @@ export type ProjectInputValidationResult =
 
 export type ProjectMemberAssignmentValidationResult =
   | { isValid: true; value: ValidatedProjectMemberAssignment }
+  | { isValid: false; message: string };
+
+export type ProjectUpdateValidationResult =
+  | { isValid: true; value: ValidatedProjectUpdate }
   | { isValid: false; message: string };
 
 function getValidationMessage(error: z.ZodError): string {
@@ -67,6 +78,24 @@ export function validateProjectMemberAssignment(
   input: unknown,
 ): ProjectMemberAssignmentValidationResult {
   const result = projectMemberAssignmentSchema.safeParse(input);
+
+  if (!result.success) {
+    return {
+      isValid: false,
+      message: getValidationMessage(result.error),
+    };
+  }
+
+  return {
+    isValid: true,
+    value: result.data,
+  };
+}
+
+export function validateProjectUpdate(
+  input: unknown,
+): ProjectUpdateValidationResult {
+  const result = projectUpdateSchema.safeParse(input);
 
   if (!result.success) {
     return {

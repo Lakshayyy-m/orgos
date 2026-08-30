@@ -4,6 +4,7 @@ import {
   maximumProjectNameLength,
   validateProjectInput,
   validateProjectMemberAssignment,
+  validateProjectUpdate,
 } from "@/src/projects/validation";
 
 describe("validateProjectInput", () => {
@@ -72,6 +73,35 @@ describe("validateProjectMemberAssignment", () => {
       validateProjectMemberAssignment({
         projectId: "not-a-project-id",
         userId: "00000000-0000-4000-8000-000000000001",
+      }),
+    ).toMatchObject({ isValid: false });
+  });
+});
+
+describe("validateProjectUpdate", () => {
+  it("accepts a valid project ID and normalized project input", () => {
+    expect(
+      validateProjectUpdate({
+        projectId: "00000000-0000-4000-8000-000000000101",
+        name: "  Updated roadmap  ",
+        description: "  Revised scope.  ",
+      }),
+    ).toEqual({
+      isValid: true,
+      value: {
+        projectId: "00000000-0000-4000-8000-000000000101",
+        name: "Updated roadmap",
+        description: "Revised scope.",
+      },
+    });
+  });
+
+  it("rejects a malformed project ID from a direct POST", () => {
+    expect(
+      validateProjectUpdate({
+        projectId: "not-a-project-id",
+        name: "Roadmap",
+        description: "",
       }),
     ).toMatchObject({ isValid: false });
   });

@@ -6,6 +6,7 @@ import {
 import { AssignProjectMemberForm } from "./_components/assign-project-member-form";
 import { CreateProjectForm } from "./_components/create-project-form";
 import { RemoveProjectMemberButton } from "./_components/remove-project-member-button";
+import { UpdateProjectForm } from "./_components/update-project-form";
 
 export const dynamic = "force-dynamic";
 
@@ -49,10 +50,11 @@ export default async function ProjectsPage() {
                 className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
                 key={project.id}
               >
-                <h2 className="text-xl font-semibold">{project.name}</h2>
-                <p className="mt-2 text-zinc-600">
-                  {project.description || "No description provided."}
-                </p>
+                <UpdateProjectForm
+                  initialDescription={project.description}
+                  initialName={project.name}
+                  projectId={project.id}
+                />
                 <div className="mt-4">
                   <h3 className="text-sm font-medium text-zinc-700">Members</h3>
                   {project.members.length === 0 ? (

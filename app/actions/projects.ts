@@ -8,15 +8,18 @@ import {
   isProjectNameConflict,
   ProjectMembershipError,
   removeProjectMember,
+  updateProjectForOrganization,
 } from "@/src/projects/service";
 import type {
   ProjectCreationState,
   ProjectMemberAssignmentState,
   ProjectMemberRemovalState,
+  ProjectUpdateState,
 } from "@/src/projects/contracts";
 import {
   validateProjectInput,
   validateProjectMemberAssignment,
+  validateProjectUpdate,
 } from "@/src/projects/validation";
 
 export async function createProjectAction(
@@ -62,6 +65,62 @@ export async function createProjectAction(
     return {
       status: "error",
       message: "Unable to create the project. Try again.",
+    };
+  }
+}
+
+export async function updateProjectAction(
+  _previousState: ProjectUpdateState,
+  formData: FormData,
+): Promise<ProjectUpdateState> {
+  const validation = validateProjectUpdate({
+    projectId: formData.get("projectId"),
+    name: formData.get("name"),
+    description: formData.get("description"),
+  });
+
+  if (!validation.isValid) {
+    return {
+      status: "error",
+      message: validation.message,
+    };
+  }
+
+  try {
+    const project = await updateProjectForOrganization({
+      organizationId: DEMO_ACME_ORGANIZATION_ID,
+      projectId: validation.value.projectId,
+      name: validation.value.name,
+      description: validation.value.description,
+    });
+
+    if (!project) {
+      return {
+        status: "error",
+        message: "That project does not belong to Acme Corp.",
+      };
+    }
+
+    revalidatePath("/projects");
+
+    return {
+      status: "success",
+      message: `${project.name} was updated.`,
+    };
+  } catch (error: unknown) {
+    if (isProjectNameConflict(error)) {
+      return {
+        status: "error",
+        message: "A project with that name already exists in Acme Corp.",
+      };
+    }
+
+    // eslint-disable-next-line no-console -- Server-side failures need logging until structured logging is introduced.
+    console.error("Project update failed.", error);
+
+    return {
+      status: "error",
+      message: "Unable to update the project. Try again.",
     };
   }
 }
