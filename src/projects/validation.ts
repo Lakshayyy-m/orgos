@@ -19,11 +19,31 @@ export const projectInputSchema = z.object({
     }),
 });
 
+export const projectMemberAssignmentSchema = z.object({
+  projectId: z
+    .string({ error: "Select a project." })
+    .uuid({ error: "Select a valid project." }),
+  userId: z
+    .string({ error: "Select an organization member." })
+    .uuid({ error: "Select a valid organization member." }),
+});
+
 export type ValidatedProjectInput = z.infer<typeof projectInputSchema>;
+export type ValidatedProjectMemberAssignment = z.infer<
+  typeof projectMemberAssignmentSchema
+>;
 
 export type ProjectInputValidationResult =
   | { isValid: true; value: ValidatedProjectInput }
   | { isValid: false; message: string };
+
+export type ProjectMemberAssignmentValidationResult =
+  | { isValid: true; value: ValidatedProjectMemberAssignment }
+  | { isValid: false; message: string };
+
+function getValidationMessage(error: z.ZodError): string {
+  return error.issues[0]?.message ?? "The project input is invalid.";
+}
 
 export function validateProjectInput(
   input: unknown,
@@ -33,7 +53,25 @@ export function validateProjectInput(
   if (!result.success) {
     return {
       isValid: false,
-      message: result.error.issues[0]?.message ?? "The project input is invalid.",
+      message: getValidationMessage(result.error),
+    };
+  }
+
+  return {
+    isValid: true,
+    value: result.data,
+  };
+}
+
+export function validateProjectMemberAssignment(
+  input: unknown,
+): ProjectMemberAssignmentValidationResult {
+  const result = projectMemberAssignmentSchema.safeParse(input);
+
+  if (!result.success) {
+    return {
+      isValid: false,
+      message: getValidationMessage(result.error),
     };
   }
 

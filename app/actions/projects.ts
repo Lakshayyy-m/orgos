@@ -3,11 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization";
 import {
+  assignProjectMember,
   createProjectForOrganization,
   isProjectNameConflict,
+  ProjectMembershipError,
 } from "@/src/projects/service";
-import type { ProjectCreationState } from "@/src/projects/contracts";
-import { validateProjectInput } from "@/src/projects/validation";
+import type {
+  ProjectCreationState,
+  ProjectMemberAssignmentState,
+} from "@/src/projects/contracts";
+import {
+  validateProjectInput,
+  validateProjectMemberAssignment,
+} from "@/src/projects/validation";
 
 export async function createProjectAction(
   _previousState: ProjectCreationState,
@@ -32,7 +40,7 @@ export async function createProjectAction(
       description: validation.value.description,
     });
 
-    revalidatePath("/");
+    revalidatePath("/projects");
 
     return {
       status: "success",
@@ -52,6 +60,60 @@ export async function createProjectAction(
     return {
       status: "error",
       message: "Unable to create the project. Try again.",
+    };
+  }
+}
+
+export async function assignProjectMemberAction(
+  _previousState: ProjectMemberAssignmentState,
+  formData: FormData,
+): Promise<ProjectMemberAssignmentState> {
+  const validation = validateProjectMemberAssignment({
+    projectId: formData.get("projectId"),
+    userId: formData.get("userId"),
+  });
+
+  if (!validation.isValid) {
+    return {
+      status: "error",
+      message: validation.message,
+    };
+  }
+
+  try {
+    const result = await assignProjectMember({
+      organizationId: DEMO_ACME_ORGANIZATION_ID,
+      projectId: validation.value.projectId,
+      userId: validation.value.userId,
+    });
+
+    if (result.status === "already_assigned") {
+      return {
+        status: "error",
+        message: "That member is already assigned to the project.",
+      };
+    }
+
+    revalidatePath("/projects");
+
+    return {
+      status: "success",
+      message: "Project member assigned.",
+    };
+  } catch (error: unknown) {
+    if (error instanceof ProjectMembershipError) {
+      return {
+        status: "error",
+        message: "The project or member does not belong to Acme Corp.",
+      };
+    }
+
+    // eslint-disable-next-line no-console -- Server-side failures need logging until structured logging is introduced.
+    console.error("Project member assignment failed.", error);
+
+    return {
+      status: "error",
+      message: "Unable to assign the member. Try again.",
     };
   }
 }

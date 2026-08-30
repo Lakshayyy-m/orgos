@@ -90,4 +90,12 @@ project_members
 
 **Why:** It avoids N+1 member queries and keeps the organization filter at the database access boundary. The UI receives only the project members associated with the fixed Phase 1 Acme Corp context.
 
-**Tradeoff:** This is a display-only membership view. A later task will add assignment and removal through a server action; Phase 3 will replace the demo context with a membership-validated active organization.
+**Tradeoff:** The view and assignment flow remain limited to the Phase 1 demo organization. A later task will add removal; Phase 3 will replace the demo context with a membership-validated active organization.
+
+### 2026-08-23 — Validate both sides of project-member assignment
+
+**Decision:** The assignment action accepts only a project ID and user ID, validates their UUID format with Zod, then supplies the Acme Corp ID server-side. The service verifies that the project and organization membership both belong to that organization before inserting.
+
+**Why:** A direct POST can change either ID. Validation alone only checks syntax; server-side organization-scoped lookups and the `project_members` composite foreign keys together prevent tenant confusion.
+
+**Tradeoff:** This is not user authorization. Phase 3/4 will resolve an authenticated actor and require the appropriate organization permission before this mutation is allowed.

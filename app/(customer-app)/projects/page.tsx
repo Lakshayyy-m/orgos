@@ -1,13 +1,18 @@
 import { DEMO_ACME_ORGANIZATION_ID } from "@/src/organizations/demo-organization";
-import { listProjectsForOrganization } from "@/src/projects/service";
+import {
+  listOrganizationMembers,
+  listProjectsForOrganization,
+} from "@/src/projects/service";
+import { AssignProjectMemberForm } from "./_components/assign-project-member-form";
 import { CreateProjectForm } from "./_components/create-project-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
-  const projects = await listProjectsForOrganization(
-    DEMO_ACME_ORGANIZATION_ID,
-  );
+  const [projects, organizationMembers] = await Promise.all([
+    listProjectsForOrganization(DEMO_ACME_ORGANIZATION_ID),
+    listOrganizationMembers(DEMO_ACME_ORGANIZATION_ID),
+  ]);
 
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 font-sans text-zinc-900">
@@ -22,6 +27,13 @@ export default async function ProjectsPage() {
         <section className="mt-12 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold">Create a project</h2>
           <CreateProjectForm />
+        </section>
+        <section className="mt-12 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">Assign a project member</h2>
+          <AssignProjectMemberForm
+            organizationMembers={organizationMembers}
+            projects={projects}
+          />
         </section>
         <section className="mt-12 space-y-4">
           <h2 className="text-xl font-semibold">All projects</h2>

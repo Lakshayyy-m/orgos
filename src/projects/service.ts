@@ -1,7 +1,12 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { getDatabase } from "@/db/server";
-import { projectMembers, projects, users } from "@/db/schema";
+import {
+  organizationMembers,
+  projectMembers,
+  projects,
+  users,
+} from "@/db/schema";
 
 export type ProjectSummary = {
   id: string;
@@ -19,11 +24,34 @@ export type ProjectWithMembers = ProjectSummary & {
   members: ProjectMemberSummary[];
 };
 
+export type OrganizationMemberSummary = {
+  userId: string;
+  displayName: string;
+};
+
 export type CreateProjectInput = {
   organizationId: string;
   name: string;
   description: string;
 };
+
+export type AssignProjectMemberInput = {
+  organizationId: string;
+  projectId: string;
+  userId: string;
+};
+
+export type AssignProjectMemberResult = {
+  status: "assigned" | "already_assigned";
+};
+
+export class ProjectMembershipError extends Error {
+  constructor(
+    public readonly code: "project_not_found" | "user_not_in_organization",
+  ) {
+    super(code);
+  }
+}
 
 export async function listProjectsForOrganization(
   organizationId: string,
@@ -70,6 +98,20 @@ export async function listProjectsForOrganization(
   return [...projectsById.values()];
 }
 
+export async function listOrganizationMembers(
+  organizationId: string,
+): Promise<readonly OrganizationMemberSummary[]> {
+  return getDatabase()
+    .select({
+      userId: users.id,
+      displayName: users.displayName,
+    })
+    .from(organizationMembers)
+    .innerJoin(users, eq(users.id, organizationMembers.userId))
+    .where(eq(organizationMembers.organizationId, organizationId))
+    .orderBy(asc(users.displayName));
+}
+
 export async function createProjectForOrganization(
   input: CreateProjectInput,
 ): Promise<ProjectSummary> {
@@ -88,6 +130,54 @@ export async function createProjectForOrganization(
   }
 
   return project;
+}
+
+export async function assignProjectMember(
+  input: AssignProjectMemberInput,
+): Promise<AssignProjectMemberResult> {
+  const database = getDatabase();
+
+  const [project] = await database
+    .select({ id: projects.id })
+    .from(projects)
+    .where(
+      and(
+        eq(projects.id, input.projectId),
+        eq(projects.organizationId, input.organizationId),
+      ),
+    )
+    .limit(1);
+
+  if (!project) {
+    throw new ProjectMembershipError("project_not_found");
+  }
+
+  const [organizationMember] = await database
+    .select({ userId: organizationMembers.userId })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.organizationId, input.organizationId),
+        eq(organizationMembers.userId, input.userId),
+      ),
+    )
+    .limit(1);
+
+  if (!organizationMember) {
+    throw new ProjectMembershipError("user_not_in_organization");
+  }
+
+  const [assignment] = await database
+    .insert(projectMembers)
+    .values(input)
+    .onConflictDoNothing({
+      target: [projectMembers.projectId, projectMembers.userId],
+    })
+    .returning({ id: projectMembers.id });
+
+  return {
+    status: assignment ? "assigned" : "already_assigned",
+  };
 }
 
 export function isProjectNameConflict(error: unknown): boolean {

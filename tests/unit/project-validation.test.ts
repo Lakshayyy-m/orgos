@@ -3,6 +3,7 @@ import {
   maximumProjectDescriptionLength,
   maximumProjectNameLength,
   validateProjectInput,
+  validateProjectMemberAssignment,
 } from "@/src/projects/validation";
 
 describe("validateProjectInput", () => {
@@ -53,5 +54,25 @@ describe("validateProjectInput", () => {
       isValid: false,
       message: "A project name is required.",
     });
+  });
+});
+
+describe("validateProjectMemberAssignment", () => {
+  it("accepts UUIDs for a project and organization member", () => {
+    expect(
+      validateProjectMemberAssignment({
+        projectId: "00000000-0000-4000-8000-000000000101",
+        userId: "00000000-0000-4000-8000-000000000001",
+      }),
+    ).toMatchObject({ isValid: true });
+  });
+
+  it("rejects malformed IDs from a direct POST", () => {
+    expect(
+      validateProjectMemberAssignment({
+        projectId: "not-a-project-id",
+        userId: "00000000-0000-4000-8000-000000000001",
+      }),
+    ).toMatchObject({ isValid: false });
   });
 });
