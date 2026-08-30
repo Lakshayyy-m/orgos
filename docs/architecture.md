@@ -179,3 +179,11 @@ project_members
 **Why:** Hashing outside the transaction avoids holding database locks during the deliberately costly operation. The transaction prevents a partially registered account without its credential or verification record.
 
 **Tradeoff:** A duplicate email still incurs one password-hash computation before the database rejects it. This avoids a race-prone pre-check and keeps email uniqueness authoritative in PostgreSQL.
+
+### 2026-08-30 — Consume verification tokens atomically
+
+**Decision:** Email verification conditionally updates a token only when its hash matches, it is unconsumed, and it has not expired. It marks the user verified in the same transaction.
+
+**Why:** The conditional update makes a token single-use even when two requests race. Returning one generic invalid-or-expired result for unknown, expired, and consumed secrets limits token-state disclosure.
+
+**Tradeoff:** An email sender and public verification route are still needed to deliver a usable link. They are intentionally separate from token-consumption logic so raw secrets remain transient.

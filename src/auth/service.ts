@@ -1,4 +1,5 @@
 import "server-only";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { getDatabase } from "@/db/server";
 import {
   emailVerificationTokens,
@@ -6,7 +7,7 @@ import {
   users,
 } from "@/db/schema";
 import { hashPassword } from "./password";
-import { generateOpaqueToken } from "./tokens";
+import { generateOpaqueToken, hashOpaqueToken } from "./tokens";
 import type { ValidatedRegistration } from "./validation";
 
 const verificationTokenLifetimeMilliseconds = 24 * 60 * 60 * 1_000;
@@ -16,6 +17,10 @@ export type RegistrationResult = {
   email: string;
   rawVerificationToken: string;
   verificationExpiresAt: Date;
+};
+
+export type EmailVerificationResult = {
+  status: "verified" | "invalid_or_expired";
 };
 
 export class DuplicateEmailError extends Error {
@@ -84,4 +89,48 @@ export async function registerUser(
 
     throw error;
   }
+}
+
+export async function verifyEmailVerificationToken(
+  rawToken: string,
+): Promise<EmailVerificationResult> {
+  if (rawToken.length === 0) {
+    return { status: "invalid_or_expired" };
+  }
+
+  const now = new Date();
+  const tokenHash = hashOpaqueToken(rawToken);
+
+  return getDatabase().transaction(async (transaction) => {
+    const [verificationToken] = await transaction
+      .update(emailVerificationTokens)
+      .set({ consumedAt: now })
+      .where(
+        and(
+          eq(emailVerificationTokens.tokenHash, tokenHash),
+          isNull(emailVerificationTokens.consumedAt),
+          gt(emailVerificationTokens.expiresAt, now),
+        ),
+      )
+      .returning({ userId: emailVerificationTokens.userId });
+
+    if (!verificationToken) {
+      return { status: "invalid_or_expired" };
+    }
+
+    const [user] = await transaction
+      .update(users)
+      .set({
+        emailVerifiedAt: now,
+        updatedAt: now,
+      })
+      .where(eq(users.id, verificationToken.userId))
+      .returning({ id: users.id });
+
+    if (!user) {
+      throw new Error("Verification token references a missing user.");
+    }
+
+    return { status: "verified" };
+  });
 }

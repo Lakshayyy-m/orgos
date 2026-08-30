@@ -23,6 +23,8 @@ These use vetted package or platform cryptography. OrgOS does not implement pass
 
 Registration normalizes and validates input, hashes the password before opening a database transaction, then creates the user, password credential, and short-lived verification-token hash atomically. The browser or email receives only the raw verification secret.
 
+Email verification hashes the raw secret and conditionally marks its database record consumed only while it is unexpired. In the same transaction, it sets `users.email_verified_at`. Replayed, expired, unknown, or empty tokens all fail with the same result.
+
 Login verifies the password hash and creates a session. The response receives the raw session secret in a secure cookie; later requests hash that value and load a non-expired, non-revoked session.
 
 ## Threat model
