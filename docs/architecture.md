@@ -187,3 +187,11 @@ project_members
 **Why:** The conditional update makes a token single-use even when two requests race. Returning one generic invalid-or-expired result for unknown, expired, and consumed secrets limits token-state disclosure.
 
 **Tradeoff:** An email sender and public verification route are still needed to deliver a usable link. They are intentionally separate from token-consumption logic so raw secrets remain transient.
+
+### 2026-08-30 — Deliver verification secrets through SMTP URL fragments
+
+**Decision:** Verification email uses provider-neutral SMTP, with Mailpit configured for local development. The raw token is encoded in the verification URL fragment instead of the query string.
+
+**Why:** SMTP supports local and production providers without coupling the domain to a vendor. URL fragments are not included in the initial HTTP request, reducing accidental raw-token exposure through request logs.
+
+**Tradeoff:** The verification page needs client-side code to read the fragment and submit it to a server action. This is a deliberate tradeoff for reduced token leakage.

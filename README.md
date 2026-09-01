@@ -34,9 +34,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Phase 1 is verified against PostgreSQL. Phase 2 now has its durable credential, verification-token, and opaque-session schema. The next explicitly requested task will add vetted password and token primitives.
 
-## Local database
+## Local services
 
-Copy the example environment values, start PostgreSQL, then apply migrations:
+Copy the example environment values, start PostgreSQL and Mailpit, then apply migrations:
 
 ```bash
 cp .env.example .env.local
@@ -46,6 +46,8 @@ npm run db:seed
 ```
 
 This requires a running Docker daemon and the Docker Compose v2 plugin.
+
+Mailpit receives development email at [localhost:8025](http://localhost:8025).
 
 ## Project documentation
 

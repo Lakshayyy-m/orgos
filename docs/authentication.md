@@ -19,6 +19,12 @@ Passwords use the maintained `argon2` package with Argon2id (`19,456 KiB` memory
 
 These use vetted package or platform cryptography. OrgOS does not implement password hashing, random-number generation, or hash algorithms itself.
 
+## Verification email delivery
+
+Verification messages use SMTP through Nodemailer. Development uses Mailpit on SMTP port `1025` with its inbox at `http://localhost:8025`; production can provide any SMTP-compatible service through environment variables.
+
+The verification secret is placed in the email URL fragment (`/verify-email#token=...`). Fragments are not sent with the initial HTTP request, reducing accidental token capture in server and proxy request logs. The future verification page will read the fragment and POST it to the server.
+
 ## Request lifecycle
 
 Registration normalizes and validates input, hashes the password before opening a database transaction, then creates the user, password credential, and short-lived verification-token hash atomically. The browser or email receives only the raw verification secret.
